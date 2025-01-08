@@ -24,18 +24,10 @@ jobs:
           set -x
           curl -L ${{ steps.fetch-url.outputs.gtfs_url }} -o TransportGZM-GTFS.zip
 
-      - name: Upload GTFS data as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: TransportGZM-GTFS
-          path: TransportGZM-GTFS.zip
-
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           name: GTFS $(date +'%d-%m-%d')
           tag_name: $(date +'%d-%m-%d')
-          body_path: ${{ github.workspace }}-CHANGELOG.txt
-          repository: my_gh_org/my_gh_repo
           files: TransportGZM-GTFS.zip
           make_latest: true
