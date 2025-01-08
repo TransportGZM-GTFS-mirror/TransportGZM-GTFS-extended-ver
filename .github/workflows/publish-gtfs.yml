@@ -14,16 +14,18 @@ jobs:
       - name: Fetch GTFS data URL
         id: fetch-url
         run: |
-          export DATA_SET=317435cc-0075-4d10-b8ef-6e9b0010e90a
+          set -x
+          DATA_SET=317435cc-0075-4d10-b8ef-6e9b0010e90a
           url=$(curl -s "https://otwartedane.metropoliagzm.pl/api/3/action/package_show?id=${DATA_SET}" | jq -r '.result.resources | sort_by(.created) | last | .url')
-          echo "gtfs_url=${url}" >> $GITHUB_STATE
+          echo "gtfs_url=${url}" >> $GITHUB_OUTPUT
 
       - name: Download GTFS data
         run: |
+          set -x
           curl -L ${{ steps.fetch-url.outputs.gtfs_url }} -o TransportGZM-GTFS.zip
 
       - name: Upload GTFS data as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: TransportGZM-GTFS
           path: TransportGZM-GTFS.zip
