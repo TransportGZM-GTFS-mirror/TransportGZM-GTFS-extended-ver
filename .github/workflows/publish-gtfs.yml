@@ -11,6 +11,10 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
+      - name: Generate Date
+        id: date
+        run: echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
+
       - name: Fetch GTFS data URL
         id: fetch-url
         run: |
@@ -27,7 +31,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          name: GTFS $(date +'%d-%m-%d')
-          tag_name: $(date +'%d-%m-%d')
+          name: GTFS ${{ steps.date.outputs.date }}
+          tag_name: GTFS ${{ steps.date.outputs.date }}
           files: TransportGZM-GTFS.zip
           make_latest: true
