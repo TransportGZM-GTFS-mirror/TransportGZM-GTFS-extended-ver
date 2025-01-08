@@ -1,0 +1,38 @@
+name: Publish GTFS Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight
+  workflow_dispatch:
+
+jobs:
+  fetch-and-publish:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch GTFS data URL
+        id: fetch-url
+        run: |
+          export DATA_SET=317435cc-0075-4d10-b8ef-6e9b0010e90a
+          url=$(curl -s "https://otwartedane.metropoliagzm.pl/api/3/action/package_show?id=${DATA_SET}" | jq -r '.result.resources | sort_by(.created) | last | .url')
+          echo "gtfs_url=${url}" >> $GITHUB_STATE
+
+      - name: Download GTFS data
+        run: |
+          curl -L ${{ steps.fetch-url.outputs.gtfs_url }} -o TransportGZM-GTFS.zip
+
+      - name: Upload GTFS data as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: TransportGZM-GTFS
+          path: TransportGZM-GTFS.zip
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: GTFS $(date +'%d-%m-%d')
+          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          repository: my_gh_org/my_gh_repo
+          files: TransportGZM-GTFS.zip
+          make_latest: true
