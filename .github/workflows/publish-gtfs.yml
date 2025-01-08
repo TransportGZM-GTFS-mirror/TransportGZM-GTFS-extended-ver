@@ -32,6 +32,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: GTFS ${{ steps.date.outputs.date }}
-          tag_name: GTFS ${{ steps.date.outputs.date }}
+          tag_name: ${{ steps.date.outputs.date }}
           files: TransportGZM-GTFS.zip
           make_latest: true
