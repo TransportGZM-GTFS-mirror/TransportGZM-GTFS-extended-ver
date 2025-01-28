@@ -26,7 +26,7 @@ jobs:
       - name: Download GTFS data
         run: |
           set -x
-          curl -L ${{ steps.fetch-url.outputs.gtfs_url }} -o TransportGZM-GTFS.zip
+          curl -L -k ${{ steps.fetch-url.outputs.gtfs_url }} -o TransportGZM-GTFS.zip
 
       - name: Release
         uses: softprops/action-gh-release@v2
