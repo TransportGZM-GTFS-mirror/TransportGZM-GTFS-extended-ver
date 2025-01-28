@@ -20,7 +20,7 @@ jobs:
         run: |
           set -x
           DATA_SET=317435cc-0075-4d10-b8ef-6e9b0010e90a
-          url=$(curl -s "https://otwartedane.metropoliagzm.pl/api/3/action/package_show?id=${DATA_SET}" | jq -r '.result.resources | sort_by(.created) | last | .url')
+          url=$(curl -s -k "https://otwartedane.metropoliagzm.pl/api/3/action/package_show?id=${DATA_SET}" | jq -r '.result.resources | sort_by(.created) | last | .url')
           echo "gtfs_url=${url}" >> $GITHUB_OUTPUT
 
       - name: Download GTFS data
