@@ -29,7 +29,7 @@ jobs:
           curl -L -k ${{ steps.fetch-url.outputs.gtfs_url }} -o TransportGZM-GTFS.zip
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.2.2
         with:
           name: GTFS ${{ steps.date.outputs.date }}
           tag_name: ${{ steps.date.outputs.date }}
