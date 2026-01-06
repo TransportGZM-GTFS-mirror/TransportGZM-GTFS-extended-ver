@@ -2,7 +2,7 @@ name: Publish GTFS Data
 
 on:
   schedule:
-    - cron: '0 9 * * *' # Runs daily at midnight
+    - cron: '0 9 * * *'
   workflow_dispatch:
 
 jobs:
@@ -11,27 +11,49 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14.1'
+
+      - name: Install gtfs-merge
+        run: pip install git+https://github.com/now8-org/gtfsmerge
+
       - name: Generate Date
         id: date
         run: echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
 
-      - name: Fetch GTFS data URL
+      - name: Fetch GTFS data URLs
         id: fetch-url
         run: |
           set -x
           DATA_SET=317435cc-0075-4d10-b8ef-6e9b0010e90a
-          url=$(curl -s -k "https://otwartedane.metropoliagzm.pl/api/3/action/package_show?id=${DATA_SET}" | jq -r '.result.resources | sort_by(.created) | last | .url')
-          echo "gtfs_url=${url}" >> $GITHUB_OUTPUT
+          urls=$(curl -s -k "https://otwartedane.metropoliagzm.pl/api/3/action/package_show?id=${DATA_SET}" \
+            | jq -c '.result.resources | map(select(.name | endswith(".zip"))) | sort_by(.created) | map(.url)')
+          echo "gtfs_url=${urls}" >> $GITHUB_OUTPUT
 
       - name: Download GTFS data
         run: |
           set -x
-          curl -L -k ${{ steps.fetch-url.outputs.gtfs_url }} -o TransportGZM-GTFS.zip
+          urls='${{ steps.fetch-url.outputs.gtfs_url }}'
+          for url in $(echo "$urls" | jq -r '.[]'); do
+            curl -L -k -O "$url"
+          done
+
+      - name: Merge GTFS data
+        run: |
+          set -x
+          python3 -m gtfsmerge $(ls *.zip) merged.zip
+          # File is not compressed so we need to do it now
+          mkdir -p /tmp/gtfs
+          unzip merged.zip -d /tmp/gtfs
+          zip -9 -r TransportGZM-GTFS.zip /tmp/gtfs/
+          rm merged.zip
 
       - name: Release
         uses: softprops/action-gh-release@v2.2.2
         with:
           name: GTFS ${{ steps.date.outputs.date }}
           tag_name: ${{ steps.date.outputs.date }}
-          files: TransportGZM-GTFS.zip
+          files: "*.zip"
           make_latest: true
