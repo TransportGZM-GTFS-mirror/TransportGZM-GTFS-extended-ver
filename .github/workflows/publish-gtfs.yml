@@ -51,7 +51,7 @@ jobs:
           # File is not compressed so we need to do it now
           mkdir -p /tmp/gtfs
           unzip merged.zip -d /tmp/gtfs
-          zip -9 -r TransportGZM-GTFS.zip /tmp/gtfs/*
+          zip -9 -j TransportGZM-GTFS.zip /tmp/gtfs/*
           rm merged.zip
 
       - name: Release
