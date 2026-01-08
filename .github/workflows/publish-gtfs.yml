@@ -44,6 +44,10 @@ jobs:
         run: |
           set -x
           python3 -m gtfsmerge $(ls *.zip) merged.zip
+
+      - name: Recompress GTFS data
+        run: |
+          set -x
           # File is not compressed so we need to do it now
           mkdir -p /tmp/gtfs
           unzip merged.zip -d /tmp/gtfs
